@@ -1,0 +1,69 @@
+# See:  https://root.cern/d/how-setup-root-externals-afscvmfs.html
+
+# This seems a good option for phi1:
+. /cvmfs/sft.cern.ch/lcg/views/ROOT-latest/x86_64-centos7-gcc7-opt/setup.sh
+
+# This is apparently whole LCG shit-stoofe
+# . /cvmfs/sft.cern.ch/lcg/views/LCG_99/x86_64-centos7-gcc8-dbg/setup.sh
+
+
+################################################################################
+
+Running on vos0101 with ssh multiplexing:
+
+# start master session
+ssh -M -S lxp-ctrl lxplus.cern.ch
+
+ssh -S lxp-ctrl x
+
+ssh -S lxp-ctrl -O forward -L3333:vocms0101:80  x
+
+
+ssh -S lxp-ctrl -O forward -L10000:vocms0101:1022  x
+ssh -S lxp-ctrl -O cancel -L10000:vocms0101:1022  x
+
+ssh -S lxp-ctrl -O forward -L10000:vocms0101:10022  x
+
+################################################################################
+
+ssh -L 3333:vocms0101:22 lxplus.cern.ch cat -
+
+sshfs -o ssh_command='ssh -p 3333' localhost:/ ~/mnt/vocms-root
+
+--------------------------------
+
+ssh -M -S vocms-ctrl -p 3333 localhost
+
+ssh -S vocms-ctrl x
+
+# Map vocms0101 http to 3380
+ssh -S vocms-ctrl -O forward -L3380:localhost:80  x
+
+# Event display will run on some port between 10000 and 10101
+
+################################################################################
+
+SE linux fun on vocms0101
+
+# set http execution policy
+restorecon -R /var/www/cgi-bin/
+
+# allow http scripts to open sockets
+/usr/sbin/setsebool -P httpd_can_network_connect 1
+
+################################################################################
+
+SOCKS
+
+https://superuser.com/questions/1308495/how-to-create-a-socks-proxy-with-ssh
+
+
+ssh -N -D 9090 [USER]@[SERVER_IP]
+
+google-chrome \
+    --user-data-dir="$HOME/proxy-profile" \
+    --proxy-server="socks5://localhost:9090"
+
+I will need an extra tunnel to get to lxplus -> vocms0101
+
+And then connect to localhost on the right port.
