@@ -1,4 +1,5 @@
 # Specify port range for http server:
+WebGui.HttpPort:            0
 WebGui.HttpPortMin:         10000
 WebGui.HttpPortMax:         10101
 
@@ -6,8 +7,8 @@ WebGui.HttpPortMax:         10101
 # WebGui.HttpPort:    9090
 
 # Enable https:
-# WebGui.UseHttps:    yes
-# WebGui.ServerCert: letsencrypt-server.pem
+WebGui.UseHttps:    yes
+WebGui.ServerCert: letsencrypt-server.pem
 # Note, civet wants full cert chain++, e.g.:
 #   cd /etc/letsencrypt/live/some-host.ucsd.edu/
 #   cat privkey.pem fullchain.pem > /home/viz/revetor/letsencrypt-server.pem

@@ -1,6 +1,7 @@
 #include "TRandom3.h"
 #include "TSystem.h"
 #include "TServerSocket.h"
+#include "TEnv.h"
 #include "TROOT.h"
 #include "TApplication.h"
 
@@ -20,6 +21,8 @@
 /*
   c++ `root-config --cflags` -L`root-config --libdir` -lCore -lNet -lROOTWebDisplay -lROOTEve revetor.C -o revetor
 */
+
+const int PORT = 6666;
 
 std::map<pid_t, int> children;
 
@@ -102,10 +105,9 @@ void revetor()
    sigaction(SIGINT, &sa, &sa_int);
    sigaction(SIGTERM, &sa, &sa_term);
 
-   const int port = 7777;
-   TServerSocket *ss = new TServerSocket(port, kTRUE);
+   TServerSocket *ss = new TServerSocket(PORT, kTRUE);
 
-   printf("Server socket created on port %d, listening ...\n", port);
+   printf("Server socket created on port %d, listening ...\n", PORT);
 
    int N_tot_children = 0;
 
@@ -284,8 +286,13 @@ void revetor()
 }
 
 
-int main()
+int main(int argc, char *argv[])
 {
+  printf("%s starting: gROOT=%p, http-port=%d, min-port=%d, max-port=%d\n", argv[0], gROOT,
+         gEnv->GetValue("WebGui.HttpPort"   , -1),
+         gEnv->GetValue("WebGui.HttpPortMin", -1),
+         gEnv->GetValue("WebGui.HttpPortMax", -1));
+
    revetor();
 
    return 0;

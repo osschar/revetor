@@ -1,11 +1,17 @@
 # See:  https://root.cern/d/how-setup-root-externals-afscvmfs.html
 
-# This seems a good option for phi1:
+# Runtime e.g.
 . /cvmfs/sft.cern.ch/lcg/views/ROOT-latest/x86_64-centos7-gcc7-opt/setup.sh
 
-# This is apparently whole LCG shit-stoofe
-# . /cvmfs/sft.cern.ch/lcg/views/LCG_99/x86_64-centos7-gcc8-dbg/setup.sh
+# Build: apparently whole LCG shit-stoofe with externals
+. /cvmfs/sft.cern.ch/lcg/views/LCG_99/x86_64-centos7-gcc8-dbg/setup.sh
 
+
+################################################################################
+
+Setup for plain root on phi1:
+. /cvmfs/sft.cern.ch/lcg/views/LCG_99/x86_64-centos7-gcc8-dbg/setup.sh
+. /data2/matevz/root-bld/bin/thisroot.sh
 
 ################################################################################
 

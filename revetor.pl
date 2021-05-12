@@ -4,10 +4,13 @@ use CGI;
 
 use IO::Socket qw(AF_INET SOCK_STREAM);
 
-my $q = CGI->new;
+my $q = new CGI;
 
 $EVE_HOST   = "localhost";
-$REDIR_HOST = "localhost";
+$EVE_PORT   =  6666; # 6666 for REve, 7777 for fwShow
+$REDIR_HOST = "phi1.t2.ucsd.edu";
+
+$PRINT_TUNNEL_SUGGESTION = 0;
 
 # CGI script to connect to an Event Display server.
 #
@@ -56,7 +59,7 @@ FNORD
 
 sub cgi_die
 {
-  print "<p> $_[0]\n";
+  print "<p><b> $_[0] </b>\n";
   cgi_end();
   exit(1);
 }
@@ -69,16 +72,20 @@ cgi_beg();
 #   /usr/sbin/setsebool -P httpd_can_network_connect 1
 # Maybe we should use UNIX sockets.
 
+my $user = $ENV{'OIDC_CLAIM_given_name'};
+
+cgi_print "Hello ${user}, we shall connect you to local REve forker now ...";
+
 my $client = IO::Socket->new(
-    Domain => AF_INET,
-    Type => SOCK_STREAM,
-    proto => 'tcp',
-    PeerPort => 7777,
+    Domain   => AF_INET,
+    Type     => SOCK_STREAM,
+    proto    => 'tcp',
     PeerHost => $EVE_HOST,
-    Timeout => 5
+    PeerPort => $EVE_PORT,
+    Timeout  => 5
 ) || cgi_die "Can't open socket: $@";
 
-cgi_print "Connected to 7777";
+cgi_print "Connected to $EVE_PORT";
 
 my $buf;
 $client->recv($buf, 1024);
@@ -103,7 +110,7 @@ $client->close();
 # Expect hash response, as { 'port'=> , 'dir'=> , 'key'=> }
 $resp = eval $buf;
 
-my $URL = "http://${REDIR_HOST}:$resp->{'port'}/$resp->{'dir'}?token=$resp->{'key'}";
+my $URL = "https://${REDIR_HOST}:$resp->{'port'}/$resp->{'dir'}?token=$resp->{'key'}";
 
 # For opening on localhost directly.
 # print "xdg-open $URL\n";
@@ -115,7 +122,11 @@ Your event display is ready, click link to enter:
 </h2>
 <p>
 <a href="$URL">$URL</a>
+FNORD
 
+if ($PRINT_TUNNEL_SUGGESTION)
+{
+  print<<"FNORD";
 <small>
 <p>
 P.S. You probably need to make a tunnel to port $resp->{'port'} as things stand now.
@@ -123,5 +134,6 @@ P.S. You probably need to make a tunnel to port $resp->{'port'} as things stand 
 ssh -S vocms-ctrl -O forward -L$resp->{'port'}:localhost:$resp->{'port'}  x
 </small>
 FNORD
+}
 
 cgi_end();
